@@ -16,5 +16,6 @@ namespace PMS.Domain.Entities
         public string PasswordHash { get; set; }
         public Enumeration.AppRole Role { get; set; } = Enumeration.AppRole.Member;
         public List<TaskItem> Tasks { get; set; }
+        public List<Project> Projects { get; set; }
     }
 }

@@ -31,9 +31,24 @@ namespace PMS.Application.Repositories
             return await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
         }
 
+        public async Task<AppUser?> GetUserByEmailAsync(string email)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        }
+
+        public async Task<AppUser?> GetUserByTaskAsync(Guid taskId)
+        {
+            return await _context.Users.Include(u => u.Tasks).FirstOrDefaultAsync(u => u.Tasks.Any(t => t.Id == taskId));
+        }
+
         public async Task<List<AppUser>?> GetUsersAsync()
         {
             return await _context.Users.Include(u => u.Tasks).ToListAsync();
+        }
+
+        public async Task<List<AppUser>?> GetUsersByProjectAsync(Guid projectId)
+        {
+            return await _context.Users.Include(u => u.Projects).Where(u => u.Projects.Any(p => p.Id == projectId)).ToListAsync();
         }
 
         public async Task<bool> IsEmailUniqueAsync(string email)

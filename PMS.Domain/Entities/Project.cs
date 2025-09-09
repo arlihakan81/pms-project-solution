@@ -18,9 +18,11 @@ namespace PMS.Domain.Entities
         public decimal Budget { get; set; } 
         public Enumeration.ProjectStatus Status { get; set; } = Enumeration.ProjectStatus.Inactive;
         public Enumeration.Privacy Privacy { get; set; } = Enumeration.Privacy.Private;
+        public string Progress => $"{Tasks.Count}/{Tasks.Count(t => t.Status == Enumeration.TaskStatus.Completed)}"; 
+        public string Percentage => Tasks.Count == 0 ? "0%" : $"{(int)((Tasks.Count(t => t.Status == Enumeration.TaskStatus.Completed) / (double)Tasks.Count) * 100)}%";
 
         public List<TaskItem> Tasks { get; set; } = new List<TaskItem>();
-
+        public List<AppUser> Collaborators { get; set; }
 
     }
 }
