@@ -19,5 +19,7 @@ namespace PMS.Application.Interfaces
         Task<AppUser?> GetUserByEmailAsync(string email);
         Task<AppUser?> GetUserByTaskAsync(Guid taskId);
         Task<List<AppUser>?> GetUsersByProjectAsync(Guid projectId);
+
+        string GenerateJwtToken(AppUser user);
     }
 }

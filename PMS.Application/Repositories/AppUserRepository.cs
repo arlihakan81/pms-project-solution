@@ -1,18 +1,23 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using PMS.Application.Interfaces;
 using PMS.Domain.Entities;
 using PMS.Persistence.Context;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace PMS.Application.Repositories
 {
-    public class AppUserRepository(AppDbContext context) : IAppUserRepository
+    public class AppUserRepository(AppDbContext context, IConfiguration config) : IAppUserRepository
     { 
         private readonly AppDbContext _context = context;
+        private readonly IConfiguration _config = config;
 
         public async Task AddUserAsync(AppUser appUser)
         {
@@ -24,6 +29,30 @@ namespace PMS.Application.Repositories
         {
             _context.Users.Remove(_context.Users.FirstOrDefault(u => u.Id == userId)!);
             await _context.SaveChangesAsync();
+        }
+
+        public string GenerateJwtToken(AppUser user)
+        {
+            var claims = new[]
+            {
+                new Claim("avatar", user.Avatar ?? string.Empty),
+                new Claim(ClaimTypes.Name, user.FirstName + " " + user.LastName),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Role, user.Role.ToString())
+            };
+
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:SecretKey"]!));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: _config["Jwt:Issuer"],
+                audience: _config["Jwt:Audience"],
+                claims: claims,
+                expires: DateTime.Now.AddMinutes(30),
+                signingCredentials: creds);
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
         public async Task<AppUser?> GetUserAsync(Guid userId)
