@@ -15,7 +15,7 @@ namespace PMS.Application.Interfaces
         Task UpdateUserAsync(AppUser appUser);
         Task DeleteUserAsync(Guid userId);
         Task<AppUser?> GetUserAsync(Guid userId);
-        Task<List<AppUser>?> GetUsersAsync();
+        Task<List<AppUser>?> GetUsersAsync(Guid organizationId);
         Task<AppUser?> GetUserByEmailAsync(string email);
         Task<AppUser?> GetUserByTaskAsync(Guid taskId);
         Task<List<AppUser>?> GetUsersByProjectAsync(Guid projectId);

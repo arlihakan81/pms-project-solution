@@ -6,6 +6,7 @@ using PMS.Application.Interfaces;
 using PMS.Application.Requests;
 using PMS.Domain.Entities;
 using PMS.Domain.Enums;
+using PMS.Persistence.Context;
 
 namespace PMS.API.Controllers
 {
@@ -50,17 +51,27 @@ namespace PMS.API.Controllers
                 return Conflict("Bu e-posta adresi zaten kayıtlı.");
             }
 
-            var user = new AppUser
+            using (var context = new AppDbContext())
             {
-                FirstName = request.FirstName,
-                LastName = request.LastName,
-                Email = request.Email,
-                Role = Enumeration.AppRole.Member,
-                PasswordHash = new PasswordHasher<AppUser>().HashPassword(null!, request.Password)
-            };
+                Organization organization = new()
+                {
+                    Name = request.Email.Split('@')[0] + "'s Organization"
+                };
+                context.Organizations.Add(organization);
+                await context.SaveChangesAsync();
 
-            await _appUserRepo.AddUserAsync(user);
-
+                var organizationId = organization.Id;
+                var user = new AppUser
+                {
+                    FirstName = request.FirstName,
+                    LastName = request.LastName,
+                    Email = request.Email,
+                    Role = Enumeration.AppRole.Member,
+                    PasswordHash = new PasswordHasher<AppUser>().HashPassword(null!, request.Password),
+                    OrganizationId = organizationId
+                };
+                await _appUserRepo.AddUserAsync(user);
+            }
             return Ok("You have been registered");
         }
 

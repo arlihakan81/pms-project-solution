@@ -20,5 +20,6 @@ namespace PMS.Application.DTOs
         public string Email { get; set; }
         public string Password { get; set; }
         public Enumeration.AppRole Role { get; set; } = Enumeration.AppRole.Member;
+        public Guid OrganizationId { get; set; }
     }
 }

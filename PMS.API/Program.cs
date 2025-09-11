@@ -5,6 +5,7 @@ using PMS.Application.Interfaces;
 using PMS.Application.Repositories;
 using PMS.Persistence.Context;
 using System.Text;
+using Thunder.Application.Mapping;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -64,6 +65,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddDbContext<AppDbContext>();
 builder.Services.AddScoped<IAppUserRepository, AppUserRepository>();
+builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
+builder.Services.AddScoped<ITaskRepository, TaskRepository>();
+
+builder.Services.AddScoped<IMapper, Mapper>();
 
 var app = builder.Build();
 

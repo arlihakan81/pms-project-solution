@@ -12,7 +12,7 @@ using PMS.Persistence.Context;
 namespace PMS.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250909205251_InitialDatabase")]
+    [Migration("20250911201209_InitialDatabase")]
     partial class InitialDatabase
     {
         /// <inheritdoc />
@@ -31,6 +31,9 @@ namespace PMS.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Avatar")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -46,6 +49,9 @@ namespace PMS.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -57,6 +63,8 @@ namespace PMS.Persistence.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("OrganizationId");
 
                     b.ToTable("Users");
                 });
@@ -88,6 +96,27 @@ namespace PMS.Persistence.Migrations
                     b.ToTable("Collaborations");
                 });
 
+            modelBuilder.Entity("PMS.Domain.Entities.Organization", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Organizations");
+                });
+
             modelBuilder.Entity("PMS.Domain.Entities.Project", b =>
                 {
                     b.Property<Guid>("Id")
@@ -110,6 +139,9 @@ namespace PMS.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<int>("Privacy")
                         .HasColumnType("int");
 
@@ -128,6 +160,8 @@ namespace PMS.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("OrganizationId");
+
                     b.ToTable("Projects");
                 });
 
@@ -135,9 +169,6 @@ namespace PMS.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("AssigneeId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedAt")
@@ -180,6 +211,17 @@ namespace PMS.Persistence.Migrations
                     b.ToTable("Tasks");
                 });
 
+            modelBuilder.Entity("PMS.Domain.Entities.AppUser", b =>
+                {
+                    b.HasOne("PMS.Domain.Entities.Organization", "Organization")
+                        .WithMany("Users")
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Organization");
+                });
+
             modelBuilder.Entity("PMS.Domain.Entities.Collaboration", b =>
                 {
                     b.HasOne("PMS.Domain.Entities.Project", "Project")
@@ -197,6 +239,17 @@ namespace PMS.Persistence.Migrations
                     b.Navigation("Project");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("PMS.Domain.Entities.Project", b =>
+                {
+                    b.HasOne("PMS.Domain.Entities.Organization", "Organization")
+                        .WithMany("Projects")
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Organization");
                 });
 
             modelBuilder.Entity("PMS.Domain.Entities.TaskItem", b =>
@@ -221,6 +274,13 @@ namespace PMS.Persistence.Migrations
             modelBuilder.Entity("PMS.Domain.Entities.AppUser", b =>
                 {
                     b.Navigation("Tasks");
+                });
+
+            modelBuilder.Entity("PMS.Domain.Entities.Organization", b =>
+                {
+                    b.Navigation("Projects");
+
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("PMS.Domain.Entities.Project", b =>

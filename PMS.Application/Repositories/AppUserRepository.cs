@@ -39,7 +39,8 @@ namespace PMS.Application.Repositories
                 new Claim(ClaimTypes.Name, user.FirstName + " " + user.LastName),
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.Role.ToString())
+                new Claim(ClaimTypes.Role, user.Role.ToString()),
+                new Claim("organizationId", user.OrganizationId.ToString())
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:SecretKey"]!));
@@ -70,9 +71,9 @@ namespace PMS.Application.Repositories
             return await _context.Users.Include(u => u.Tasks).FirstOrDefaultAsync(u => u.Tasks.Any(t => t.Id == taskId));
         }
 
-        public async Task<List<AppUser>?> GetUsersAsync()
+        public async Task<List<AppUser>?> GetUsersAsync(Guid organizationId)
         {
-            return await _context.Users.Include(u => u.Tasks).ToListAsync();
+            return await _context.Users.Include(u => u.Tasks).Where(u => u.OrganizationId == organizationId).ToListAsync();
         }
 
         public async Task<List<AppUser>?> GetUsersByProjectAsync(Guid projectId)

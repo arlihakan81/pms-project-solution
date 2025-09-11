@@ -16,6 +16,9 @@ namespace PMS.Domain.Entities
         public string Email { get; set; }
         public string PasswordHash { get; set; }
         public Enumeration.AppRole Role { get; set; } = Enumeration.AppRole.Member;
+        public Guid OrganizationId { get; set; }
+
+        public Organization Organization { get; set; }
         public List<TaskItem> Tasks { get; set; }
         public List<Project> Projects { get; set; }
     }

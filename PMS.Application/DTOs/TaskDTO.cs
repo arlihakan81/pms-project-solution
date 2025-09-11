@@ -6,9 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PMS.Domain.Entities
+namespace PMS.Application.DTOs
 {
-    public class TaskItem : BaseEntity<Guid>
+    public class TaskDTO : BaseEntity<Guid>
     {
         public Guid ProjectId { get; set; }
         public string Title { get; set; }
@@ -19,8 +19,5 @@ namespace PMS.Domain.Entities
         public Enumeration.TaskStatus Status { get; set; } = Enumeration.TaskStatus.NotStarted;
         public Enumeration.PriorityLevel Priority { get; set; }
         public Guid UserId { get; set; }
-
-        public Project Project { get; set; }
-        public AppUser User { get; set; }
     }
 }
