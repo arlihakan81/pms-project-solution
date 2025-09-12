@@ -14,6 +14,9 @@ namespace PMS.Application.Interfaces
         
         // Basic CRUD Operations
         Task<List<Project>?> GetProjectsAsync(Guid organizationId);
+        Task<List<Project>?> GetProjectsByUserAsync(Guid userId);
+        Task<List<Project>?> GetUpcomingDeadlineProjectsAsync(Guid organizationId);
+
         Task AddProjectAsync(Project project);
         Task UpdateProjectAsync(Project project);
         Task DeleteProjectAsync(Guid projectId);

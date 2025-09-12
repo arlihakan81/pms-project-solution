@@ -41,6 +41,25 @@ namespace PMS.Application.Repositories
             return await _context.Projects.Include(p => p.Tasks).Where(p => p.OrganizationId == organizationId).ToListAsync();
         }
 
+        public async Task<List<Project>?> GetProjectsByUserAsync(Guid userId)
+        {
+            return await _context.Projects
+                .Include(p => p.Tasks)
+                .ThenInclude(t => t.User)
+                .Where(p => p.Tasks.Any(t => t.UserId == userId))
+                .ToListAsync();
+        }
+
+        public async Task<List<Project>?> GetUpcomingDeadlineProjectsAsync(Guid organizationId)
+        {
+            var currentDate = DateTime.Now;
+            var upcomingDate = currentDate.AddDays(7);
+            return await _context.Projects
+                .Include(p => p.Tasks)
+                .Where(p => p.OrganizationId == organizationId && p.Deadline >= currentDate && p.Deadline <= upcomingDate)
+                .ToListAsync();
+        }
+
         public async Task<bool> IsUniqueProjectTitleAsync(Guid organizationId, string title)
         {
             return await _context.Projects.AnyAsync(p => p.Title.ToLower().Trim() == title.ToLower().Trim() && p.OrganizationId == organizationId);

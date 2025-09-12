@@ -30,6 +30,18 @@ namespace PMS.API.Controllers
             return Ok(result);
         }
 
+        [HttpGet("user/{userId:guid}")]
+        public async Task<ActionResult<List<TaskDTO>>> GetTasksByUserIdAsync([FromRoute] Guid userId)
+        {
+            var tasks = await _taskRepository.GetTasksByUserAsync(userId);
+            if (tasks is null || tasks.Count == 0)
+            {
+                return NotFound("Kullanıcıya atanmış görev bulunamadı");
+            }
+            var result = _mapper.Map<TaskDTO, TaskItem>(tasks);
+            return Ok(result);
+        }
+
         [HttpGet("{id:guid}")]
         public async Task<ActionResult<TaskDTO>> GetTaskByIdAsync([FromRoute] Guid id)
         {
@@ -49,6 +61,18 @@ namespace PMS.API.Controllers
             if (tasks is null || tasks.Count == 0)
             {
                 return NotFound("Gecikmiş görev bulunamadı");
+            }
+            var result = _mapper.Map<TaskDTO, TaskItem>(tasks);
+            return Ok(result);
+        }
+
+        [HttpGet("unassigned/{projectId:guid}")]
+        public async Task<ActionResult<List<TaskDTO>>> GetUnassignedTasksAsync([FromRoute] Guid projectId)
+        {
+            var tasks = await _taskRepository.GetUnassignedTasksAsync(projectId);
+            if (tasks is null || tasks.Count == 0)
+            {
+                return NotFound("Atanmamış görev bulunamadı");
             }
             var result = _mapper.Map<TaskDTO, TaskItem>(tasks);
             return Ok(result);
@@ -91,7 +115,7 @@ namespace PMS.API.Controllers
             existingTask.Title = taskDto.Title;
             existingTask.Description = taskDto.Description;
             existingTask.Status = taskDto.Status;
-            existingTask.DurationInDays = taskDto.DurationInDays;
+            existingTask.EndDate = taskDto.EndDate;
             existingTask.Priority = taskDto.Priority;
             existingTask.StartDate = taskDto.StartDate;
             existingTask.Status = taskDto.Status;
@@ -101,6 +125,39 @@ namespace PMS.API.Controllers
 
             await _taskRepository.UpdateTaskAsync(existingTask);
             return Ok("Görev başarıyla güncellendi");
+        }
+
+        [HttpPatch("{id:guid}/assign/{userId:guid}")]
+        public async Task<IActionResult> AssignTaskToUserAsync([FromRoute] Guid id, [FromRoute] Guid userId)
+        {
+            var existingTask = await _taskRepository.GetTaskAsync(id);
+            if (existingTask is null)
+            {
+                return NotFound("Görev bulunamadı");
+            }
+
+            existingTask.UserId = userId;
+            existingTask.UpdatedAt = DateTime.Now;
+
+            await _taskRepository.UpdateTaskAsync(existingTask);
+            return Ok("Görev başarıyla kullanıcıya atandı");
+        }
+
+        [HttpPatch("{id:guid}/unassign/{userId:guid}")]
+        public async Task<IActionResult> UnassignTaskToUserAsync([FromRoute] Guid id, [FromRoute] Guid userId)
+        {
+            var existingTask = await _taskRepository.GetTaskAsync(id);
+            if (existingTask is null)
+            {
+                return NotFound("Görev bulunamadı");
+            }
+            if(userId == existingTask.UserId)
+            {
+                existingTask.UserId = null;
+            }
+            existingTask.UpdatedAt = DateTime.Now;
+            await _taskRepository.UpdateTaskAsync(existingTask);
+            return Ok("Görev başarıyla kullanıcıdan devredildi");
         }
 
         [HttpDelete("{id:guid}")]

@@ -15,6 +15,9 @@ namespace PMS.Persistence.Context
         public DbSet<TaskItem> Tasks { get; set; }
         public DbSet<Collaboration> Collaborations { get; set; }
         public DbSet<Organization> Organizations { get; set; }
+        public DbSet<Comment> Comments { get; set; }
+        public DbSet<Activity> Activities { get; set; }
+
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

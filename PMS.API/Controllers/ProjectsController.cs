@@ -28,6 +28,18 @@ namespace PMS.API.Controllers
             return Ok(result);
         }
 
+        [HttpGet("user/{userId:guid}")]
+        public async Task<ActionResult<List<ProjectDTO>>> GetProjectsByUserAsync([FromRoute] Guid userId)
+        {
+            var projects = await _projectRepo.GetProjectsByUserAsync(userId);
+            if (projects is null || projects.Count == 0)
+            {
+                return NotFound("Kullanıcıya atanmış proje bulunamadı.");
+            }
+            var result = _mapper.Map<ProjectDTO, Project>(projects);
+            return Ok(result);
+        }
+
         [HttpGet("{projectId:guid}")]
         public async Task<ActionResult<ProjectDTO>> GetProjectAsync([FromRoute] Guid projectId)
         {
@@ -37,6 +49,18 @@ namespace PMS.API.Controllers
                 return NotFound("Proje bulunamadı.");
             }
             var result = _mapper.Map<ProjectDTO, Project>(project);
+            return Ok(result);
+        }
+
+        [HttpGet("upcoming-deadlines/{organizationId:guid}")]
+        public async Task<ActionResult<List<ProjectDTO>>> GetUpcomingDeadlineProjectsAsync([FromRoute] Guid organizationId)
+        {
+            var projects = await _projectRepo.GetUpcomingDeadlineProjectsAsync(organizationId);
+            if (projects is null || projects.Count == 0)
+            {
+                return NotFound("Yaklaşan teslim tarihine sahip proje bulunamadı.");
+            }
+            var result = _mapper.Map<ProjectDTO, Project>(projects);
             return Ok(result);
         }
 

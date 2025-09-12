@@ -28,7 +28,7 @@ namespace PMS.Application.Repositories
 
         public async Task<List<TaskItem>?> GetOverdueTasksAsync(Guid organizationId)
         {
-            var currentDate = DateTime.UtcNow;
+            var currentDate = DateTime.Now;
             return await _context.Tasks
                 .Include(t => t.Project)
                 .Where(t => t.Project.OrganizationId == organizationId && t.EndDate < currentDate && t.Status != Domain.Enums.Enumeration.TaskStatus.Completed)
@@ -48,6 +48,16 @@ namespace PMS.Application.Repositories
         public async Task<List<TaskItem>?> GetTasksAsync(Guid projectId)
         {
             return await _context.Tasks.Where(t => t.ProjectId == projectId).ToListAsync();
+        }
+
+        public async Task<List<TaskItem>?> GetTasksByUserAsync(Guid userId)
+        {
+            return await _context.Tasks.Where(t => t.UserId == userId).ToListAsync();
+        }
+
+        public async Task<List<TaskItem>?> GetUnassignedTasksAsync(Guid projectId)
+        {
+            return await _context.Tasks.Where(t => t.ProjectId == projectId && t.UserId == null).ToListAsync();
         }
 
         public async Task<bool> IsUniqueTaskTitleAsync(Guid projectId, string title)

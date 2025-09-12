@@ -14,10 +14,9 @@ namespace PMS.Application.DTOs
         public string Title { get; set; }
         public string? Description { get; set; }
         public DateTime StartDate { get; set; }
-        public int DurationInDays { get; set; }
-        public DateTime EndDate => StartDate.AddDays(DurationInDays);
+        public DateTime EndDate { get; set; }
         public Enumeration.TaskStatus Status { get; set; } = Enumeration.TaskStatus.NotStarted;
         public Enumeration.PriorityLevel Priority { get; set; }
-        public Guid UserId { get; set; }
+        public Guid? UserId { get; set; }
     }
 }

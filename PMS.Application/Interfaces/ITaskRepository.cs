@@ -12,9 +12,10 @@ namespace PMS.Application.Interfaces
         Task<TaskItem?> GetTaskByTitleAsync(string title);
         Task<TaskItem?> GetTaskAsync(Guid taskId);
         Task<List<TaskItem>?> GetOverdueTasksAsync(Guid organizationId);
-
+        Task<List<TaskItem>?> GetUnassignedTasksAsync(Guid projectId);
         // Basic CRUD Operations
         Task<List<TaskItem>?> GetTasksAsync(Guid projectId);
+        Task<List<TaskItem>?> GetTasksByUserAsync(Guid userId);
         Task AddTaskAsync(TaskItem task);
         Task UpdateTaskAsync(TaskItem task);
         Task DeleteTaskAsync(Guid taskId);
