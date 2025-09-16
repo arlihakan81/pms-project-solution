@@ -31,7 +31,7 @@ namespace PMS.API.Controllers
         }
 
         [HttpGet("user/{userId:guid}")]
-        public async Task<ActionResult<List<TaskDTO>>> GetTasksByUserIdAsync([FromRoute] Guid userId)
+        public async Task<ActionResult<List<TaskDTO>>> GetTasksByUserAsync([FromRoute] Guid userId)
         {
             var tasks = await _taskRepository.GetTasksByUserAsync(userId);
             if (tasks is null || tasks.Count == 0)
@@ -43,7 +43,7 @@ namespace PMS.API.Controllers
         }
 
         [HttpGet("{id:guid}")]
-        public async Task<ActionResult<TaskDTO>> GetTaskByIdAsync([FromRoute] Guid id)
+        public async Task<ActionResult<TaskDTO>> GetTaskAsync([FromRoute] Guid id)
         {
             var task = await _taskRepository.GetTaskAsync(id);
             if (task is null)
@@ -89,7 +89,6 @@ namespace PMS.API.Controllers
             if (await _taskRepository.IsUniqueTaskTitleAsync(taskDto.ProjectId, taskDto.Title))
                 return Conflict("Bu başlıkta zaten bir görev mevcut");
 
-
             var task = _mapper.Map<TaskItem, TaskDTO>(taskDto);
             await _taskRepository.AddTaskAsync(task);
             return Ok("Görev başarıyla oluşturuldu");
@@ -127,6 +126,48 @@ namespace PMS.API.Controllers
             return Ok("Görev başarıyla güncellendi");
         }
 
+        [HttpPost("add-tag/{taskId:guid}")]
+        public async Task<IActionResult> AddTagToTaskAsync([FromRoute] Guid taskId, [FromBody] Guid tagId)
+        {
+            var existingTask = await _taskRepository.GetTaskAsync(taskId);
+            if (existingTask is null)
+            {
+                return NotFound("Görev bulunamadı");
+            }
+
+            await _taskRepository.AddTagToTaskAsync(taskId, tagId);
+            return Ok("Etiket başarıyla göreve eklendi");
+        }
+
+        [HttpPost("remove-tag/{taskId:guid}")]
+        public async Task<IActionResult> RemoveTagFromTaskAsync([FromRoute] Guid taskId, [FromBody] Guid tagId)
+        {
+            var existingTask = await _taskRepository.GetTaskAsync(taskId);
+            if (existingTask is null)
+            {
+                return NotFound("Görev bulunamadı");
+            }
+
+            await _taskRepository.RemoveTagFromTaskAsync(taskId, tagId);
+            return Ok("Etiket başarıyla görevden çıkarıldı");
+        }
+
+        [HttpPatch("set-due-date/{id:guid}")]
+        public async Task<IActionResult> SetDueDateAsync([FromRoute] Guid id, [FromBody] DateTime dueDate)
+        {
+            var existingTask = await _taskRepository.GetTaskAsync(id);
+            if (existingTask is null)
+            {
+                return NotFound("Görev bulunamadı");
+            }
+
+            existingTask.DueDate = dueDate;
+            existingTask.UpdatedAt = DateTime.Now;
+
+            await _taskRepository.UpdateTaskAsync(existingTask);
+            return Ok("Görev için son teslim tarihi başarıyla ayarlandı");
+        }
+
         [HttpPatch("{id:guid}/assign/{userId:guid}")]
         public async Task<IActionResult> AssignTaskToUserAsync([FromRoute] Guid id, [FromRoute] Guid userId)
         {
@@ -144,7 +185,7 @@ namespace PMS.API.Controllers
         }
 
         [HttpPatch("{id:guid}/unassign/{userId:guid}")]
-        public async Task<IActionResult> UnassignTaskToUserAsync([FromRoute] Guid id, [FromRoute] Guid userId)
+        public async Task<IActionResult> UnassignTaskFromUserAsync([FromRoute] Guid id, [FromRoute] Guid userId)
         {
             var existingTask = await _taskRepository.GetTaskAsync(id);
             if (existingTask is null)

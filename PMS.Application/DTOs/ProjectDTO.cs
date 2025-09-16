@@ -1,9 +1,11 @@
 ﻿using PMS.Domain.Common;
+using PMS.Domain.Entities;
 using PMS.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace PMS.Application.DTOs
@@ -21,5 +23,6 @@ namespace PMS.Application.DTOs
         public string? Progress { get; set; }
         public string? Percentage { get; set; }
         public Guid OrganizationId { get; set; }
+
     }
 }

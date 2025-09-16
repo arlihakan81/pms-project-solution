@@ -67,7 +67,9 @@ builder.Services.AddDbContext<AppDbContext>();
 builder.Services.AddScoped<IAppUserRepository, AppUserRepository>();
 builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
 builder.Services.AddScoped<ITaskRepository, TaskRepository>();
-builder.Services.AddScoped<IActivityRepository, ActivityRepository>();
+builder.Services.AddScoped<IActivityLogRepository, ActivityRepository>();
+builder.Services.AddScoped<ICommentRepository, CommentRepository>();
+builder.Services.AddScoped<ITagRepository, TagRepository>();
 
 builder.Services.AddScoped<IMapper, Mapper>();
 

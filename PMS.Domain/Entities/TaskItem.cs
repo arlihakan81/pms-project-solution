@@ -15,11 +15,15 @@ namespace PMS.Domain.Entities
         public string? Description { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
+        public DateTime? DueDate { get; set; }
         public Enumeration.TaskStatus Status { get; set; } = Enumeration.TaskStatus.NotStarted;
         public Enumeration.PriorityLevel Priority { get; set; }
         public Guid? UserId { get; set; }
 
         public Project Project { get; set; }
         public AppUser? User { get; set; }
+
+        public List<Tag>? Tags { get; set; }
+        public List<Subtask>? Subtasks { get; set; }
     }
 }

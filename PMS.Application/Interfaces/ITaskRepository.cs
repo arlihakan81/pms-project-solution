@@ -13,6 +13,10 @@ namespace PMS.Application.Interfaces
         Task<TaskItem?> GetTaskAsync(Guid taskId);
         Task<List<TaskItem>?> GetOverdueTasksAsync(Guid organizationId);
         Task<List<TaskItem>?> GetUnassignedTasksAsync(Guid projectId);
+        int GetTaskCountByProject(Guid projectId);
+        Task AddTagToTaskAsync(Guid taskId, Guid tagId);
+        Task RemoveTagFromTaskAsync(Guid taskId, Guid tagId);
+
         // Basic CRUD Operations
         Task<List<TaskItem>?> GetTasksAsync(Guid projectId);
         Task<List<TaskItem>?> GetTasksByUserAsync(Guid userId);

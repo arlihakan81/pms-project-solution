@@ -64,6 +64,43 @@ namespace PMS.API.Controllers
             return Ok(result);
         }
 
+        [HttpGet("organization/{organizationId:guid}/date-range/{startDate:datetime}/{endDate:datetime}")]
+        public async Task<ActionResult<List<ProjectDTO>>> GetProjectsByDateRangeAsync([FromRoute] Guid organizationId, [FromRoute] DateTime startDate, [FromRoute] DateTime endDate)
+        {
+            var projects = await _projectRepo.GetProjectsByDateRangeAsync(organizationId, startDate, endDate);
+            if (projects is null || projects.Count == 0)
+            {
+                return NotFound("Belirtilen tarih aralığında proje bulunamadı.");
+            }
+            var result = _mapper.Map<ProjectDTO, Project>(projects);
+            return Ok(result);
+        }
+
+        [HttpPost("assign/{projectId:guid}/user/{userId:guid}")]
+        public async Task<IActionResult> AssignProjectToUserAsync([FromRoute] Guid projectId, [FromRoute] Guid userId)
+        {
+            var project = await _projectRepo.GetProjectAsync(projectId);
+            if (project is null)
+            {
+                return NotFound("Proje bulunamadı.");
+            }
+
+            await _projectRepo.AssignToUserAsync(projectId, userId);
+            return Ok("Proje başarıyla kullanıcıya atandı.");
+        }
+
+        [HttpPost("unassign/{projectId:guid}/user/{userId:guid}")]
+        public async Task<IActionResult> UnassignProjectFromUserAsync([FromRoute] Guid projectId, [FromRoute] Guid userId)
+        {
+            var project = await _projectRepo.GetProjectAsync(projectId);
+            if (project is null)
+            {
+                return NotFound("Proje bulunamadı.");
+            }
+            await _projectRepo.UnassignFromUserAsync(projectId, userId);
+            return Ok("Proje başarıyla kullanıcıdan kaldırıldı.");
+        }
+
         [HttpPost]
         public async Task<IActionResult> CreateProjectAsync([FromBody] ProjectDTO projectDto)
         {
@@ -109,7 +146,6 @@ namespace PMS.API.Controllers
             existingProject.Status = projectDto.Status;
             existingProject.Privacy = projectDto.Privacy;
             existingProject.CoverImageUrl = projectDto.CoverImageUrl;
-            existingProject.OrganizationId = projectDto.OrganizationId;
             existingProject.UpdatedAt = DateTime.Now;
 
             await _projectRepo.UpdateProjectAsync(existingProject);

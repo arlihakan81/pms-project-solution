@@ -22,13 +22,10 @@ namespace PMS.Persistence.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("PMS.Domain.Entities.Activity", b =>
+            modelBuilder.Entity("PMS.Domain.Entities.ActivityLog", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("CommentId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedAt")
@@ -45,13 +42,11 @@ namespace PMS.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CommentId");
-
                     b.HasIndex("TaskId");
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Activities");
+                    b.ToTable("ActivityLogs");
                 });
 
             modelBuilder.Entity("PMS.Domain.Entities.AppUser", b =>
@@ -138,10 +133,20 @@ namespace PMS.Persistence.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid>("TaskItemId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("TaskItemId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Comments");
                 });
@@ -215,6 +220,70 @@ namespace PMS.Persistence.Migrations
                     b.ToTable("Projects");
                 });
 
+            modelBuilder.Entity("PMS.Domain.Entities.Subtask", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("TaskId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("TaskItemId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TaskItemId");
+
+                    b.ToTable("Subtasks");
+                });
+
+            modelBuilder.Entity("PMS.Domain.Entities.Tag", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Color")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Icon")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.ToTable("Tags");
+                });
+
             modelBuilder.Entity("PMS.Domain.Entities.TaskItem", b =>
                 {
                     b.Property<Guid>("Id")
@@ -226,6 +295,9 @@ namespace PMS.Persistence.Migrations
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("DueDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime>("EndDate")
                         .HasColumnType("datetime2");
@@ -261,12 +333,35 @@ namespace PMS.Persistence.Migrations
                     b.ToTable("Tasks");
                 });
 
-            modelBuilder.Entity("PMS.Domain.Entities.Activity", b =>
+            modelBuilder.Entity("PMS.Domain.Entities.TaskTag", b =>
                 {
-                    b.HasOne("PMS.Domain.Entities.Comment", "Comment")
-                        .WithMany("Activities")
-                        .HasForeignKey("CommentId");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("TagId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("TaskItemId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TagId");
+
+                    b.HasIndex("TaskItemId");
+
+                    b.ToTable("TaskTags");
+                });
+
+            modelBuilder.Entity("PMS.Domain.Entities.ActivityLog", b =>
+                {
                     b.HasOne("PMS.Domain.Entities.TaskItem", "Task")
                         .WithMany()
                         .HasForeignKey("TaskId")
@@ -278,8 +373,6 @@ namespace PMS.Persistence.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Comment");
 
                     b.Navigation("Task");
 
@@ -316,10 +409,51 @@ namespace PMS.Persistence.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("PMS.Domain.Entities.Comment", b =>
+                {
+                    b.HasOne("PMS.Domain.Entities.TaskItem", "TaskItem")
+                        .WithMany()
+                        .HasForeignKey("TaskItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PMS.Domain.Entities.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("TaskItem");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("PMS.Domain.Entities.Project", b =>
                 {
                     b.HasOne("PMS.Domain.Entities.Organization", "Organization")
                         .WithMany("Projects")
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Organization");
+                });
+
+            modelBuilder.Entity("PMS.Domain.Entities.Subtask", b =>
+                {
+                    b.HasOne("PMS.Domain.Entities.TaskItem", "TaskItem")
+                        .WithMany("Subtasks")
+                        .HasForeignKey("TaskItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("TaskItem");
+                });
+
+            modelBuilder.Entity("PMS.Domain.Entities.Tag", b =>
+                {
+                    b.HasOne("PMS.Domain.Entities.Organization", "Organization")
+                        .WithMany()
                         .HasForeignKey("OrganizationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -344,14 +478,28 @@ namespace PMS.Persistence.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("PMS.Domain.Entities.TaskTag", b =>
+                {
+                    b.HasOne("PMS.Domain.Entities.Tag", "Tag")
+                        .WithMany()
+                        .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PMS.Domain.Entities.TaskItem", "TaskItem")
+                        .WithMany()
+                        .HasForeignKey("TaskItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tag");
+
+                    b.Navigation("TaskItem");
+                });
+
             modelBuilder.Entity("PMS.Domain.Entities.AppUser", b =>
                 {
                     b.Navigation("Tasks");
-                });
-
-            modelBuilder.Entity("PMS.Domain.Entities.Comment", b =>
-                {
-                    b.Navigation("Activities");
                 });
 
             modelBuilder.Entity("PMS.Domain.Entities.Organization", b =>
@@ -364,6 +512,11 @@ namespace PMS.Persistence.Migrations
             modelBuilder.Entity("PMS.Domain.Entities.Project", b =>
                 {
                     b.Navigation("Tasks");
+                });
+
+            modelBuilder.Entity("PMS.Domain.Entities.TaskItem", b =>
+                {
+                    b.Navigation("Subtasks");
                 });
 #pragma warning restore 612, 618
         }

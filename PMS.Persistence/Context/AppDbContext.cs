@@ -16,7 +16,10 @@ namespace PMS.Persistence.Context
         public DbSet<Collaboration> Collaborations { get; set; }
         public DbSet<Organization> Organizations { get; set; }
         public DbSet<Comment> Comments { get; set; }
-        public DbSet<Activity> Activities { get; set; }
+        public DbSet<ActivityLog> ActivityLogs { get; set; }
+        public DbSet<Tag> Tags { get; set; }
+        public DbSet<TaskTag> TaskTags { get; set; }
+        public DbSet<Subtask> Subtasks { get; set; }
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -27,6 +30,7 @@ namespace PMS.Persistence.Context
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Project>().HasMany(p => p.Collaborators).WithMany(c => c.Projects).UsingEntity<Collaboration>();            
+            modelBuilder.Entity<TaskItem>().HasMany(t => t.Tags).WithMany(tg => tg.Tasks).UsingEntity<TaskTag>();
         }
 
     }

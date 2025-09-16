@@ -14,6 +14,17 @@ namespace PMS.Application.Repositories
     {
         private readonly AppDbContext _context = context;
 
+        public async Task AddTagToTaskAsync(Guid taskId, Guid tagId)
+        {
+            var existingTagIds = _context.TaskTags.Where(tt => tt.TaskItemId == taskId).Select(tt => tt.TagId).ToList();
+            _context.TaskTags.Add(new TaskTag
+            {
+                TaskItemId = taskId,
+                TagId = tagId
+            });            
+            await _context.SaveChangesAsync();
+        }
+
         public async Task AddTaskAsync(TaskItem task)
         {
             _context.Tasks.Add(task);
@@ -45,6 +56,11 @@ namespace PMS.Application.Repositories
             return await _context.Tasks.Where(t => t.Title == title).FirstOrDefaultAsync();
         }
 
+        public int GetTaskCountByProject(Guid projectId)
+        {
+            return _context.Tasks.Include(t => t.Project).Count(t => t.ProjectId == projectId);
+        }
+
         public async Task<List<TaskItem>?> GetTasksAsync(Guid projectId)
         {
             return await _context.Tasks.Where(t => t.ProjectId == projectId).ToListAsync();
@@ -68,6 +84,16 @@ namespace PMS.Application.Repositories
         public async Task<bool> IsUniqueTaskTitleAsync(Guid taskId, Guid projectId, string title)
         {
             return await _context.Tasks.AnyAsync(t => t.Id != taskId && t.Title.ToLower().Trim() == title.ToLower().Trim() && t.ProjectId == projectId);
+        }
+
+        public async Task RemoveTagFromTaskAsync(Guid taskId, Guid tagId)
+        {
+            var taskTag = _context.TaskTags.FirstOrDefault(tt => tt.TaskItemId == taskId && tt.TagId == tagId);
+            if (taskTag != null)
+            {
+                _context.TaskTags.Remove(taskTag);
+                await _context.SaveChangesAsync();
+            }
         }
 
         public async Task UpdateTaskAsync(TaskItem task)

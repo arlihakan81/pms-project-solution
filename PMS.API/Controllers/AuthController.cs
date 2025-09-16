@@ -63,6 +63,7 @@ namespace PMS.API.Controllers
                 var organizationId = organization.Id;
                 var user = new AppUser
                 {
+                    Avatar = "avatar.webp",
                     FirstName = request.FirstName,
                     LastName = request.LastName,
                     Email = request.Email,
